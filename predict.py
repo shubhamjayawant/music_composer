@@ -3,6 +3,7 @@
 import pickle
 import numpy
 import random
+import config
 from music21 import instrument, note, stream, chord
 from keras.models import Sequential
 from keras.layers import Dense
@@ -11,10 +12,11 @@ from keras.layers import LSTM
 from keras.layers import Activation
 from keras.utils.vis_utils import plot_model
 
-def generate():
+def generate(output_file_name):
     """ Generate a piano midi file """
     #load the notes used to train the model
-    with open('data/notes', 'rb') as filepath:
+    with open(config.NOTES_ARRAY_DIR + 'notes', 'rb') as filepath:
+
         notes = pickle.load(filepath)
 
     # notes.append('0.1.2')
@@ -25,7 +27,7 @@ def generate():
     network_input, normalized_input = prepare_sequences(notes, pitchnames, n_vocab)
     model = create_network(normalized_input, n_vocab)
     prediction_output = generate_notes(model, network_input, pitchnames, n_vocab)
-    create_midi(prediction_output)
+    create_midi(prediction_output, output_file_name)
 
 def prepare_sequences(notes, pitchnames, n_vocab):
     """ Prepare the sequences used by the Neural Network """
@@ -67,7 +69,7 @@ def create_network(network_input, n_vocab):
     model.add(Dense(n_vocab))
     model.add(Activation('softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-    model.load_weights('coldplay_weights.hdf5')
+    model.load_weights(config.PRETRAINED_MODEL)
     return model
 
 # def pick_start():
@@ -75,7 +77,7 @@ def _load_songs():
 
     songs = None
 
-    with open('data/songs', 'rb') as filepath:
+    with open(config.NOTES_ARRAY_DIR + 'songs', 'rb') as filepath:
         songs = pickle.load(filepath)
 
     return songs
@@ -133,7 +135,7 @@ def generate_notes(model, network_input, pitchnames, n_vocab):
 
     return prediction_output
 
-def create_midi(prediction_output):
+def create_midi(prediction_output, output_file_name):
     """ convert the output from the prediction to notes and create a midi file
         from the notes """
     offset = 0
@@ -163,8 +165,8 @@ def create_midi(prediction_output):
         offset += 0.5
 
     midi_stream = stream.Stream(output_notes)
-
-    midi_stream.write('midi', fp='test_output.mid')
+    midi_stream.write('midi', fp= config.OUTPUT_DIR + output_file_name)
 
 if __name__ == '__main__':
-    generate()
+
+    generate('test_output.mid')

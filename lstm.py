@@ -3,6 +3,7 @@
 import glob
 import pickle
 import numpy
+import config
 from music21 import converter, instrument, note, chord
 from keras.models import Sequential
 from keras.layers import Dense
@@ -28,9 +29,8 @@ def get_notes():
     """ Get all the notes and chords from the midi files in the ./coldplay_midi directory """
     notes = []
     files = {}
-    for file in glob.glob("coldplay_midi/*.mid"):
+    for file in glob.glob(config.MIDI_FILES_DIR + "*.mid"):
         midi = converter.parse(file)
-        print("Parsing %s" % file)
         files[file] = []
         notes_to_parse = None
 
@@ -113,7 +113,7 @@ def create_network(network_input, n_vocab):
 
 def train(model, network_input, network_output):
     """ train the neural network """
-    filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
+    filepath = config.WEIGHTS + "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
     checkpoint = ModelCheckpoint(
         filepath,
         monitor='loss',
@@ -122,8 +122,8 @@ def train(model, network_input, network_output):
         mode='min'
     )
     callbacks_list = [checkpoint]
-
     model.fit(network_input, network_output, epochs=200, batch_size=64, callbacks=callbacks_list)
 
 if __name__ == '__main__':
+    
     train_network()
