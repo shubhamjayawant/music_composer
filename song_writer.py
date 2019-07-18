@@ -1,41 +1,23 @@
 import numpy as np
 import random
 from music21 import instrument, note, stream, chord
+from data_processor import DataProcessor
 
 class SongWriter():
 
-    def __init__(self, model, notes, songs, sequence_length = 100):
+    def __init__(self, model, notes, songs):
 
         self.model = model
         self.notes = notes
         self.songs = songs
-        self.sequence_length = sequence_length
 
     def write_song(self, output_file_name):
 
         pitchnames = sorted(set(item for item in self.notes))
         n_vocab = len(set(self.notes))
-        network_input, normalized_input = self.__prepare_sequences(pitchnames, n_vocab)
+        network_input, normalized_input = DataProcessor.prepare_sequences(pitchnames, n_vocab)
         prediction_output = self.__generate_notes(network_input, pitchnames, n_vocab)
         self.create_midi(prediction_output, output_file_name)
-
-    def __prepare_sequences(self, pitchnames, n_vocab):
-
-        note_to_int = dict((note, number) for number, note in enumerate(pitchnames))
-        network_input = []
-        output = []
-
-        for i in range(0, len(self.notes) - self.sequence_length, 1):
-
-            sequence_in = self.notes[i:i + self.sequence_length]
-            sequence_out = self.notes[i + self.sequence_length]
-            network_input.append([note_to_int[char] for char in sequence_in])
-            output.append(note_to_int[sequence_out])
-
-        n_patterns = len(network_input)
-        normalized_input = np.reshape(network_input, (n_patterns, self.sequence_length, 1))
-        normalized_input = normalized_input / float(n_vocab)
-        return (network_input, normalized_input)
 
     def __pick_a_song(self):
 
