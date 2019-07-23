@@ -2,12 +2,14 @@ from os import path
 import pickle
 import glob
 import numpy as np
+import config
 from keras.utils import np_utils
+from music21 import converter, instrument, note, chord
 
 class DataProcessor():
 
     @staticmethod
-    def prepare_sequences(self, notes, n_vocab, sequence_length = 50):
+    def prepare_sequences(notes, n_vocab, sequence_length = 50):
         
         pitchnames = sorted(set(item for item in notes))
         note_to_int = dict((note, number) for number, note in enumerate(pitchnames))
@@ -28,14 +30,15 @@ class DataProcessor():
         return (network_input, network_output)
 
     @staticmethod
-    def get_parsed_data(self, files_dir, output_dir = config.ARRAY_DIR, write_flag = True):
+    def get_parsed_data(files_dir, output_dir = config.ARRAY_DIR, write_flag = True):
 
-        songs = self.__load_songs(output_dir)
-        notes = self.__load_notes(output_dir)
+        ob = DataProcessor()
+        songs = ob.__load_songs(output_dir)
+        notes = ob.__load_notes(output_dir)
 
         if songs is None or notes is None:
 
-            songs, notes = self.__parse_files(files_dir, output_dir, write_flag)
+            songs, notes = ob.__parse_files(files_dir, output_dir, write_flag)
 
         return songs, notes
 
