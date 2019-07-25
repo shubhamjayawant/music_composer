@@ -50,4 +50,4 @@ class LSTM():
             mode='min'
         )
         callbacks_list = [checkpoint]
-        self.model.fit(network_input, network_output, epochs=200, batch_size=64, callbacks=callbacks_list)
+        self.model.fit(network_input, network_output, epochs=30000, batch_size=64, callbacks=callbacks_list)
